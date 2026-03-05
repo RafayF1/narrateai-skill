@@ -1,6 +1,6 @@
-# NarrateAI Cursor Skill
+# NarrateAI Skill
 
-A [Cursor Skill](https://docs.cursor.com/context/rules-for-ai) that teaches AI agents how to use [NarrateAI](https://narrateai.app) for video processing — narration, transcription, translation, dubbing, and document generation.
+An AI Skill that teaches agents how to use [NarrateAI](https://narrateai.app) for video processing — narration, transcription, translation, dubbing, and document generation. Works with Cursor, Claude, and any MCP-compatible agent.
 
 ## What is NarrateAI?
 
@@ -8,7 +8,7 @@ NarrateAI turns silent videos into narrated content using AI. Upload a screen re
 
 ## What This Skill Does
 
-This skill gives your Cursor AI agent step-by-step instructions for all NarrateAI workflows:
+This skill gives your AI agent step-by-step instructions for all NarrateAI workflows:
 
 | Workflow | What it does |
 |---|---|
@@ -27,7 +27,9 @@ Sign up at [narrateai.app](https://narrateai.app) and purchase an API credits pa
 
 ### 2. Install the MCP Server
 
-Add this to your Cursor MCP configuration (Settings → Tools & MCP → New MCP Server):
+Add this to your MCP configuration:
+
+**Cursor** (Settings → Tools & MCP → New MCP Server):
 
 ```json
 {
@@ -45,17 +47,33 @@ Add this to your Cursor MCP configuration (Settings → Tools & MCP → New MCP 
 }
 ```
 
+**Claude Desktop** (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "narrateai": {
+      "command": "uvx",
+      "args": ["narrateai-mcp"],
+      "env": {
+        "NARRATEAI_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
 ### 3. Add the Skill
 
-Copy the `.cursor/skills/` folder from this repo into your project:
+**For Cursor:** Copy the `.cursor/skills/` folder from this repo into your project:
 
 ```bash
 cp -r .cursor/skills/narrateai-video-workflows /path/to/your/project/.cursor/skills/
 ```
 
-Or clone this repo directly into your project's `.cursor/skills/` directory.
-
 Cursor will automatically discover the skill and use it when relevant.
+
+**For Claude:** Place the `SKILL.md` file in your project root or reference it in your Claude project instructions.
 
 ## Available Tools
 
@@ -86,7 +104,7 @@ en, es, fr, de, it, pt, ru, zh, yue, ja, ko — and others via Whisper fallback.
 
 ## Example Usage
 
-Ask your Cursor agent:
+Ask your AI agent:
 
 - *"Narrate this screen recording with a female voice"*
 - *"Transcribe this podcast — it's in Spanish"*
@@ -100,6 +118,7 @@ The agent will use the skill to pick the right tool, ask for any missing info (v
 - [NarrateAI App](https://narrateai.app)
 - [MCP Server on PyPI](https://pypi.org/project/narrateai-mcp/)
 - [Cursor Documentation](https://docs.cursor.com)
+- [Claude MCP Guide](https://docs.anthropic.com/en/docs/agents-and-tools/mcp)
 
 ## License
 
