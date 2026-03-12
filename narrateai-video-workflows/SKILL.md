@@ -34,9 +34,15 @@ For detailed workflow steps and edge cases, consult `references/workflows.md`.
 ## Available Voices
 
 Ask the user to choose when a voice is needed — do not default silently:
-- **chatterbox** (default) — natural, expressive
-- **female1**, **female2**, **female3**, **female4**
+
+**AI Voices:**
+- **male1** (default, fastest generation)
+- **female1** (default, fastest generation)
+- **female2**, **female3**, **female4**
 - **male2**, **male3**
+
+**Voice Cloning:**
+Users can provide their own audio file (local path or URL) for voice cloning. When a voice sample is provided, the narration uses the cloned voice instead of an AI preset. Ask: "Would you like to use an AI voice or provide your own voice sample for cloning?"
 
 ## Supported Languages
 
@@ -47,8 +53,8 @@ en, es, fr, de, it, pt, ru, zh, yue, ja, ko — and others via Whisper fallback.
 | User wants... | Tool(s) | Key requirements |
 |---|---|---|
 | Narration script from a silent video (text only) | `generate_narration_script` | MUST ASK for video context |
-| Narrated video with AI voiceover | `narrate_video_full` | MUST ASK for voice and context |
-| Turn an existing script into a video | `continue_to_full_video` | MUST ASK for voice |
+| Narrated video with AI voiceover | `narrate_video_full` | MUST ASK for voice (AI or clone) and context |
+| Turn an existing script into a video | `continue_to_full_video` | MUST ASK for voice (AI or clone) |
 | Speech-to-text from video with audio | `transcribe_video` | MUST ASK for source language |
 | Translated transcript (new video) | `translate_video` | Source and target language required |
 | Translate existing video's transcript | `translate_existing_video` | Synchronous, no polling |
@@ -65,7 +71,7 @@ en, es, fr, de, it, pt, ru, zh, yue, ja, ko — and others via Whisper fallback.
 ## Critical Rules
 
 1. **Always ask for context** before narrating: "Can you describe what this video shows?" This dramatically improves narration quality. Never skip this.
-2. **Always ask for voice** before narrating. Do not silently default.
+2. **Always ask for voice** before narrating: "Would you like an AI voice (male1, female1, etc.) or your own voice sample for cloning?" Do not silently default.
 3. **Always ask for source language** before transcribing. Do not guess.
 4. **Always ask about background music** before dubbing. Do not assume.
 5. **Always ask for document type** before generating documents.
@@ -77,8 +83,8 @@ en, es, fr, de, it, pt, ru, zh, yue, ja, ko — and others via Whisper fallback.
 1. Get video source (URL or local path).
 2. Ask for language (default: en).
 3. **MUST ASK:** "Can you describe what this video shows?"
-4. **MUST ASK:** "Which voice would you like?" (see Available Voices)
-5. Call `narrate_video_full` with `video_source`, `language`, `voice_type`, `manual_context`.
+4. **MUST ASK:** "Would you like an AI voice (male1, female1, etc.) or your own voice sample for cloning?"
+5. Call `narrate_video_full` with `video_source`, `language`, `voice_type` (or `voice_sample` if cloning), `manual_context`.
 6. Present `video_url` as a download link.
 
 ### Two-Step: Script Then Video
@@ -86,7 +92,7 @@ en, es, fr, de, it, pt, ru, zh, yue, ja, ko — and others via Whisper fallback.
 1. Call `generate_narration_script` (ask for context first).
 2. Present transcript segments to user.
 3. Offer to edit: "Would you like to change any segments?" If yes, apply changes and call `update_transcript` with full transcript.
-4. Ask for voice, then call `continue_to_full_video`.
+4. Ask: "AI voice or your own voice sample?" Then call `continue_to_full_video` with `voice_type` or `voice_sample`.
 
 ### Transcribe Speech
 
@@ -158,8 +164,8 @@ User: "I have a screen recording of our app demo, no voice. Can you narrate it?"
 
 1. Ask: "What language?" → en
 2. Ask: "Can you describe what the video shows?" → "It's a walkthrough of our new dashboard"
-3. Ask: "Which voice?" → chatterbox
-4. Call `narrate_video_full` with context
+3. Ask: "AI voice or your own voice sample?" → "Use male1"
+4. Call `narrate_video_full` with `voice_type=male1`, context
 5. Return `video_url`
 
 ### Example 2: Transcribe a meeting

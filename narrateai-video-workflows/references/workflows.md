@@ -13,9 +13,15 @@ This document describes every workflow available through the NarrateAI MCP serve
 ## Available Voices
 
 When a voice is needed and the user hasn't specified one, ask them to choose:
-- **chatterbox** (default) — natural, expressive
-- **female1**, **female2**, **female3**, **female4**
+
+**AI Voices:**
+- **male1** (default, fastest generation)
+- **female1** (default, fastest generation)
+- **female2**, **female3**, **female4**
 - **male2**, **male3**
+
+**Voice Cloning:**
+Users can provide an audio file (local path or URL) for voice cloning. Ask: "Would you like an AI voice or your own voice sample for cloning?"
 
 ## Supported Languages
 
