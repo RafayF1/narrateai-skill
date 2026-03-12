@@ -1,42 +1,57 @@
-# NarrateAI — AI Video Workflows for MCP
+# NarrateAI Skill
 
-Workflow instructions that teach AI assistants how to use NarrateAI's MCP tools for video narration, transcription, translation, dubbing, and document generation.
+A skill that teaches Claude (and other AI assistants) how to use NarrateAI's MCP tools for video narration, transcription, translation, dubbing, and document generation.
 
-## What is this?
+## What You Can Do
 
-When you connect the [NarrateAI MCP server](https://pypi.org/project/narrateai-mcp/) to your AI assistant, it gets access to video processing tools. These workflow files teach the AI *how* to use those tools effectively — when to ask for context, which voice to suggest, how to chain tools together, etc.
+- **Narrate silent videos** — AI writes a script and generates voiceover with natural voices
+- **Transcribe speech** — Extract text from meetings, podcasts, lectures
+- **Translate transcripts** — Between 11+ languages
+- **Dub videos** — Clone the speaker's voice into another language
+- **Generate documents** — Tutorials, guides, product docs from screencasts
+- **Edit before narrating** — Review and refine AI scripts before producing the final video
+- **Batch process** — Up to 5 videos in parallel
 
-**Without workflows:** The AI can call the tools but may skip important steps (like asking for context, which dramatically improves narration quality).
+## Prerequisites
 
-**With workflows:** The AI follows best practices, asks the right questions, and handles complex multi-step flows like translate-then-re-narrate.
+1. **MCP server installed:** `pip install narrateai-mcp`
+2. **API key:** Sign up at [narrateai.app](https://narrateai.app) and purchase MCP credits
 
-## Quick Start
+## Install
 
-### 1. Install the MCP server
+### Claude.ai
+
+1. Download or clone this repo
+2. Zip the `narrateai-video-workflows` folder
+3. Go to **Claude.ai → Settings → Capabilities → Skills**
+4. Click **Upload skill** and select the zip
+5. Toggle the skill on
+
+### Claude Code
+
+Place the skill folder in your project or global skills directory:
 
 ```bash
-pip install narrateai-mcp
+# Project-level
+cp -r narrateai-video-workflows /your-project/.claude/skills/
+
+# Or global
+cp -r narrateai-video-workflows ~/.claude/skills/
 ```
 
-### 2. Get an API key
+### Cursor
 
-Sign up at [narrateai.app](https://narrateai.app) and purchase MCP credits.
+```bash
+cp -r narrateai-video-workflows /your-project/.cursor/skills/
+```
 
-### 3. Choose your platform
+### Other IDEs (Windsurf, JetBrains, etc.)
 
-| Platform | File to use | Where to put it |
-|----------|------------|----------------|
-| **Cursor** | `cursor/SKILL.md` | `.cursor/skills/narrateai-video-workflows/SKILL.md` |
-| **Claude Code** | `claude/CLAUDE.md` | Project root as `CLAUDE.md` |
-| **Claude Desktop** | `claude/project-knowledge.md` | Project Settings → Add Knowledge |
-| **Windsurf** | `other-ides/INSTRUCTIONS.md` | `.windsurfrules` in project root |
-| **JetBrains AI** | `other-ides/INSTRUCTIONS.md` | AI Assistant custom instructions |
-| **Google AI / Gemini** | `other-ides/INSTRUCTIONS.md` | System prompt or context |
-| **Any MCP client** | `workflows.md` | Your platform's context/instructions |
+Copy the contents of `narrateai-video-workflows/SKILL.md` into your IDE's AI rules or custom instructions file.
 
-### 4. Configure MCP
+## MCP Server Configuration
 
-Every platform needs the same MCP server config (adjust the format for your platform):
+After installing the skill, make sure the NarrateAI MCP server is connected. Add to your MCP config:
 
 ```json
 {
@@ -52,32 +67,27 @@ Every platform needs the same MCP server config (adjust the format for your plat
 }
 ```
 
-See your platform's file for exact config location and format.
+Config file locations:
+- **Claude.ai:** MCP servers are configured in Settings → Extensions
+- **Claude Code:** `.mcp.json` in project root or `~/.claude/mcp.json`
+- **Cursor:** `.cursor/mcp.json` in project root
+- **Windsurf:** `~/.codeium/windsurf/mcp_config.json`
 
-## What You Can Do
+## Usage
 
-- **Narrate silent videos** — AI writes a script and generates voiceover
-- **Transcribe speech** — Extract text from videos with existing audio
-- **Translate transcripts** — Between 11+ languages
-- **Dub videos** — Clone the speaker's voice in another language
-- **Generate documents** — Tutorials, guides, product docs from screencasts
-- **Edit before narrating** — Review and refine AI scripts before producing video
-- **Batch process** — Up to 5 videos in parallel
-- **Browse video library** — Access and re-use past videos
+Once installed, just talk naturally:
 
-## Repository Structure
+> "Narrate this video with the chatterbox voice: demo.mp4"
 
-```
-├── README.md                      ← You are here
-├── workflows.md                   ← Full workflow reference (platform-agnostic)
-├── cursor/
-│   └── SKILL.md                   ← Cursor skill file (YAML frontmatter)
-├── claude/
-│   ├── CLAUDE.md                  ← Claude Code project file
-│   └── project-knowledge.md       ← Claude Desktop project knowledge
-└── other-ides/
-    └── INSTRUCTIONS.md            ← Windsurf, JetBrains, Gemini, others
-```
+> "Transcribe this Spanish meeting recording"
+
+> "Dub this English video into French, keep the background music"
+
+> "Generate a tutorial guide from this screencast"
+
+> "Take my Messi video, translate it to Hindi, and re-narrate it"
+
+The skill automatically activates when your request matches a NarrateAI workflow.
 
 ## Available Voices
 
@@ -85,12 +95,17 @@ See your platform's file for exact config location and format.
 - **female1**, **female2**, **female3**, **female4**
 - **male2**, **male3**
 
-## Supported Languages
+## Skill Structure
 
-en, es, fr, de, it, pt, ru, zh, yue, ja, ko
+```
+narrateai-video-workflows/
+├── SKILL.md                    # Main skill file (required)
+└── references/
+    └── workflows.md            # Detailed workflow reference (loaded on demand)
+```
 
 ## Links
 
 - [NarrateAI](https://narrateai.app) — Sign up and get API credits
-- [narrateai-mcp on PyPI](https://pypi.org/project/narrateai-mcp/) — Install the MCP server
-- [MCP Protocol](https://modelcontextprotocol.io/) — Learn about Model Context Protocol
+- [narrateai-mcp on PyPI](https://pypi.org/project/narrateai-mcp/) — MCP server package
+- [Anthropic Skills Guide](https://docs.anthropic.com/en/docs/agents-and-tools/skills) — How skills work
