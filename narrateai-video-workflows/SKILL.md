@@ -56,7 +56,7 @@ en, es, fr, de, it, pt, ru, zh, yue, ja, ko — and others via Whisper fallback.
 | Narrated video with AI voiceover | `narrate_video_full` | MUST ASK for voice (AI or clone) and context |
 | Turn an existing script into a video | `continue_to_full_video` | MUST ASK for voice (AI or clone) |
 | Speech-to-text from video with audio | `transcribe_video` | MUST ASK for source language |
-| Translated transcript (new video) | `translate_video` | Source and target language required |
+| Translated transcript (new video) | `transcribe_and_translate` | Source and target language required |
 | Translate existing video's transcript | `translate_existing_video` | Synchronous, no polling |
 | Dubbed video (voice cloning) | `dub_video_full` | MUST ASK about background music |
 | Document/guide/tutorial from video | `generate_document` | MUST ASK for document type |
@@ -102,7 +102,7 @@ en, es, fr, de, it, pt, ru, zh, yue, ja, ko — and others via Whisper fallback.
 
 ### Translate
 
-- **New video:** `translate_video` with source + target language.
+- **New video:** `transcribe_and_translate` with source + target language.
 - **Existing video:** `translate_existing_video` with `job_id` — returns immediately.
 
 ### Dub

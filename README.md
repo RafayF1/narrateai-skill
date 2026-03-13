@@ -77,7 +77,7 @@ Config file locations:
 
 Once installed, just talk naturally:
 
-> "Narrate this video with the chatterbox voice: demo.mp4"
+> "Narrate this video with the male1 voice: demo.mp4"
 
 > "Transcribe this Spanish meeting recording"
 
@@ -91,7 +91,7 @@ The skill automatically activates when your request matches a NarrateAI workflow
 
 ## Available Voices
 
-- **chatterbox** (default) — natural, expressive
+- **male1** (default, fastest generation) — natural, expressive
 - **female1**, **female2**, **female3**, **female4**
 - **male2**, **male3**
 

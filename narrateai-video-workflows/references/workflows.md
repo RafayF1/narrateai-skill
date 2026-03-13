@@ -103,14 +103,14 @@ en, es, fr, de, it, pt, ru, zh, yue, ja, ko — and others via Whisper fallback.
 
 **Trigger:** User uploads a video with speech and wants a translated transcript.
 
-**Tool:** `translate_video`
+**Tool:** `transcribe_and_translate`
 
 ### Steps
 
 1. Get the video source.
 2. Ask for source language (spoken in the video). Required.
 3. Ask for target language. Required.
-4. Call `translate_video` with `video_source`, `source_language`, `target_language`.
+4. Call `transcribe_and_translate` with `video_source`, `source_language`, `target_language`.
 5. Present the translated transcript segments.
 
 ---
