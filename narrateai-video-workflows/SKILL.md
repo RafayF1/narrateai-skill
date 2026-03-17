@@ -1,21 +1,19 @@
 ---
 name: narrateai-video-workflows
-description: >
-  NarrateAI video processing workflows via MCP: narrate silent videos with AI voiceover,
-  transcribe speech-to-text, translate transcripts, dub videos with voice cloning, and
-  generate documents from screencasts. Use when user wants to "narrate this video",
-  "add voiceover", "transcribe this meeting", "translate this video", "dub into French",
-  "generate a guide from this screencast", "create product docs from video", "edit the
-  narration script", "show my videos", or "re-narrate in another language".
-  Requires the narrateai MCP server to be connected.
-  Do NOT use for general video editing, trimming, compression, format conversion,
-  or non-NarrateAI tasks.
+description: NarrateAI video processing workflows via MCP. Narrate silent videos with AI voiceover, transcribe speech-to-text, translate transcripts, dub videos with voice cloning, and generate documents from screencasts. Use when user wants to narrate a video, add voiceover, transcribe a meeting, translate a video, dub into another language, generate a guide from a screencast, create product docs from video, edit the narration script, show my videos, or re-narrate in another language. Requires the narrateai MCP server. Do NOT use for general video editing, trimming, compression, or format conversion.
 metadata:
   author: NarrateAI
   version: 2.0.0
   mcp-server: narrateai
   category: video-processing
-  tags: [video, narration, transcription, translation, dubbing, voiceover, mcp]
+  tags:
+    - video
+    - narration
+    - transcription
+    - translation
+    - dubbing
+    - voiceover
+    - mcp
   documentation: https://narrateai.app
 ---
 
