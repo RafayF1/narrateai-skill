@@ -5,10 +5,22 @@ This document describes every workflow available through the NarrateAI MCP serve
 ## Before You Start
 
 - **Stdio mode (local):** Processing tools poll internally (every 25s, up to 15 min). Do NOT manually poll unless the tool returns `status: timeout`.
-- **HTTP/remote mode:** Processing tools return a `job_id` immediately. Poll with `get_job_result(job_id)` every 25 seconds until the job completes.
+- **HTTP/remote mode:** Processing tools return a `job_id` immediately. You MUST poll — see Polling Rules below.
 - Always preserve and return `job_id` and `db_job_id` from responses — users may need them later.
 - When a tool returns `video_url`, present it as a clickable download link.
 - **Local files in HTTP/remote mode:** The server cannot access local files. Use `get_upload_url` first, upload via curl, then pass the returned `temp_file_path` as `video_source`.
+
+### Polling Rules (Critical — Read This)
+
+Video processing takes **1–5 minutes** depending on video length and processing type.
+
+1. **Poll with `get_job_result(job_id)` every 20–30 seconds.** Do not stop after one or two polls.
+2. **Poll at least 6–8 times** (covering ~3 minutes) before considering a job stuck or failed.
+3. **A job at 10–30% progress is NORMAL.** It means the video was downloaded and is being processed. Do NOT interpret low progress as an error, download failure, or source URL issue.
+4. **NEVER diagnose source/download problems from progress percentage alone.** If `status` is `processing`, the video is being worked on successfully. Only report failure when `status` is explicitly `failed` with an error message.
+5. **NEVER suggest the user re-upload, switch hosting providers, or use a different URL** while a job is still `processing`. Wait for completion or explicit failure.
+6. **If a poll returns `status: processing`**, say "Still processing — I'll check again shortly" and poll again. Do not speculate about problems or offer alternatives.
+7. Only report failure if `status: failed` with an error message, OR after 10+ polls (~5 minutes) with zero progress change.
 
 ## Available Voices
 
@@ -295,6 +307,18 @@ The response includes `has_synced_transcript: true` and a `transcript` array. Of
 
 ---
 
+## Video Source Options
+
+All processing tools accept a `video_source`. Supported formats:
+
+| Source | Format | Notes |
+|--------|--------|-------|
+| Direct URL | `https://example.com/video.mp4` | Any publicly accessible URL |
+| Google Drive | `https://drive.google.com/uc?export=download&id=FILE_ID` | Convert share link: extract `FILE_ID` from `drive.google.com/file/d/FILE_ID/view` |
+| Dropbox | `https://dropbox.com/...?dl=1` | Change `?dl=0` to `?dl=1` for direct download |
+| Local file | `/path/to/video.mp4` | Stdio mode only |
+| Temp upload | `temp/user-id/filename.mp4` | Use upload flow below for remote mode |
+
 ## Uploading Local Files (Remote Mode)
 
 When the MCP server runs remotely and the user provides a local file:
@@ -304,6 +328,19 @@ When the MCP server runs remotely and the user provides a local file:
 3. Pass `temp_file_path` as `video_source` to any processing tool.
 
 Not needed in stdio mode — tools read local files directly.
+
+### Claude.ai / Web Sandbox Limitation
+
+Web-based AI environments (like Claude.ai) block outgoing requests to `storage.googleapis.com`, so the curl upload cannot be run from within the sandbox.
+
+**Workaround A — User runs curl locally:**
+1. Call `get_upload_url(filename)` — the MCP call works fine.
+2. Give the user the exact curl command to paste in their terminal.
+3. Tell them: "Run this in your terminal. No output means success."
+4. Once confirmed, proceed with `temp_file_path` as `video_source`.
+
+**Workaround B — Public URL (easier):**
+Ask the user to share the video via Google Drive, Dropbox, or any file host and provide the public URL. Pass that URL directly as `video_source` — no upload step needed.
 
 ---
 

@@ -22,12 +22,24 @@ metadata:
 ## Important
 
 - **Stdio mode (local):** Processing tools poll internally. Do NOT manually poll unless the tool returns `status: timeout`.
-- **HTTP/remote mode:** Tools return a `job_id` immediately. Poll with `get_job_result(job_id)` every 25 seconds until complete.
+- **HTTP/remote mode:** Tools return a `job_id` immediately. You MUST poll with `get_job_result(job_id)` — see Polling Rules below.
 - Always preserve and return `job_id` and `db_job_id` from responses — users need them for follow-up actions.
 - When a tool returns `video_url`, present it as a clickable download link.
 - **Local files in remote mode:** Use `get_upload_url` first, upload via curl, then pass `temp_file_path` as `video_source`.
 
 For detailed workflow steps and edge cases, consult `references/workflows.md`.
+
+## Polling Rules (Critical)
+
+Video processing takes **1–5 minutes** depending on video length and processing type. You MUST follow these rules:
+
+1. **Poll with `get_job_result(job_id)` every 20–30 seconds.** Do not stop after one poll.
+2. **Poll at least 6–8 times** before considering a job failed. That covers ~3 minutes of processing.
+3. **A job at 10–30% progress is NORMAL.** It means the video was downloaded successfully and is being processed. Do NOT interpret low progress as an error or source URL issue.
+4. **NEVER diagnose source/download problems from progress percentage alone.** If `status` is `processing`, the video is being worked on. Only report failure if `status` is `failed` with an explicit error message.
+5. **NEVER suggest the user re-upload, switch hosting, or use a different URL** while a job is still `processing`. Wait for it to finish or fail.
+6. **If a poll returns `status: processing`**, tell the user "Still processing — I'll check again shortly" and poll again. Do not offer workarounds or alternatives.
+7. Only report failure if `status: failed` with an error message, OR after 10+ polls (~5 minutes) with no progress change.
 
 ## Available Voices
 
@@ -131,11 +143,36 @@ Types: `user_onboarding`, `tutorial_guide`, `feature_showcase`, `business_overvi
 
 All batch tools accept `video_sources_json` (max 5 videos). For `narrate_batch`, ask voice once and ask about context: same for all, per-video (`contexts_json`), or skip.
 
+## Video Source Options
+
+All processing tools accept a `video_source` parameter. This can be:
+
+1. **Direct URL** — Any publicly accessible video URL (e.g., hosted on your server, CDN, S3, etc.). This is the simplest option.
+2. **Google Drive link** — Share the file ("Anyone with the link" → Viewer), then convert the link:
+   - Share link format: `https://drive.google.com/file/d/FILE_ID/view?usp=sharing`
+   - Direct download format: `https://drive.google.com/uc?export=download&id=FILE_ID`
+   - Extract the `FILE_ID` from the share link and use the direct download format as `video_source`.
+3. **Dropbox link** — Change `?dl=0` to `?dl=1` at the end to get a direct download URL.
+4. **Local file path** — Only works in stdio mode (local MCP server). In remote/HTTP mode, use the upload flow below.
+5. **Temp upload** — For local files in remote mode, use the upload flow below.
+
 ## Uploading Local Files (Remote Mode)
 
 1. Call `get_upload_url(filename)` → returns `upload_url` and `temp_file_path`.
 2. Upload: `curl -X PUT -H 'Content-Type: video/mp4' --upload-file 'video.mp4' '<upload_url>'`
 3. Pass `temp_file_path` as `video_source`.
+
+### Claude.ai / Web Sandbox Limitation
+
+When running in Claude.ai (or similar web-based AI environments), the sandbox blocks outgoing requests to `storage.googleapis.com`. This means you **cannot** run the curl upload from within the sandbox.
+
+**Workaround:** Ask the user to run the curl command in their own terminal:
+1. Call `get_upload_url(filename)` to get the upload URL (this works — the MCP call goes through).
+2. Give the user the exact curl command to run locally in their terminal.
+3. Tell them: "Run this in your terminal. No output means success. Come back and tell me when it's done."
+4. Once confirmed, proceed with `temp_file_path` as `video_source`.
+
+**Alternative (easier):** Ask the user to share the video via a **public URL** (Google Drive, Dropbox, or any hosting). Then pass that URL directly as `video_source` — no upload step needed.
 
 ## Handling Timeouts
 
