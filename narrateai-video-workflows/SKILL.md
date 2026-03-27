@@ -22,24 +22,24 @@ metadata:
 ## Important
 
 - **Stdio mode (local):** Processing tools poll internally. Do NOT manually poll unless the tool returns `status: timeout`.
-- **HTTP/remote mode:** Tools return a `job_id` immediately. You MUST poll with `get_job_result(job_id)` — see Polling Rules below.
+- **HTTP/remote mode:** Tools return a `job_id` immediately. Poll with `get_job_result(job_id)` every 60 seconds — see Polling Rules below.
 - Always preserve and return `job_id` and `db_job_id` from responses — users need them for follow-up actions.
 - When a tool returns `video_url`, present it as a clickable download link.
 - **Local files in remote mode:** Use `get_upload_url` first, upload via curl, then pass `temp_file_path` as `video_source`.
 
 For detailed workflow steps and edge cases, consult `references/workflows.md`.
 
-## Polling Rules (Critical)
+## Polling Rules (HTTP/Remote Mode)
 
-Video processing takes **1–5 minutes** depending on video length and processing type. You MUST follow these rules:
+Video processing takes **3–5 minutes** depending on video length and processing type. You MUST follow these rules:
 
-1. **Poll with `get_job_result(job_id)` every 20–30 seconds.** Do not stop after one poll.
-2. **Poll at least 6–8 times** before considering a job failed. That covers ~3 minutes of processing.
-3. **A job at 10–30% progress is NORMAL.** It means the video was downloaded successfully and is being processed. Do NOT interpret low progress as an error or source URL issue.
-4. **NEVER diagnose source/download problems from progress percentage alone.** If `status` is `processing`, the video is being worked on. Only report failure if `status` is `failed` with an explicit error message.
-5. **NEVER suggest the user re-upload, switch hosting, or use a different URL** while a job is still `processing`. Wait for it to finish or fail.
-6. **If a poll returns `status: processing`**, tell the user "Still processing — I'll check again shortly" and poll again. Do not offer workarounds or alternatives.
-7. Only report failure if `status: failed` with an error message, OR after 10+ polls (~5 minutes) with no progress change.
+1. **Poll with `get_job_result(job_id)` every 60 seconds.** Do NOT poll more frequently than this.
+2. **Keep poll messages brief.** Say "Still processing, checking again shortly..." — do NOT offer workarounds or alternatives.
+3. **A job at 10–30% progress is NORMAL.** Do NOT interpret low progress as an error or failure.
+4. **NEVER diagnose source/download problems from progress percentage alone.** If `status` is `processing`, the video is being worked on.
+5. **NEVER suggest the user re-upload, switch hosting, or use a different URL** while a job is still `processing`.
+6. Only report failure if `status: failed` with an explicit error message.
+7. **After ~6 polls** (~6 minutes) with no completion, tell the user it's taking longer than usual and offer to keep checking or let them ask manually.
 
 ## Available Voices
 
