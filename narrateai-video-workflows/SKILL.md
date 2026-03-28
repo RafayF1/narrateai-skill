@@ -39,7 +39,8 @@ Video processing takes **3–5 minutes** depending on video length and processin
 4. **NEVER diagnose source/download problems from progress percentage alone.** If `status` is `processing`, the video is being worked on.
 5. **NEVER suggest the user re-upload, switch hosting, or use a different URL** while a job is still `processing`.
 6. Only report failure if `status: failed` with an explicit error message.
-7. **After ~6 polls** (~6 minutes) with no completion, tell the user it's taking longer than usual and offer to keep checking or let them ask manually.
+7. If you get `status: poll_error`, this is a **transient connection issue** — the job is still running. Just retry `get_job_result` on your next poll. Do NOT treat this as a failure or suggest troubleshooting.
+8. **After ~6 polls** (~6 minutes) with no completion, tell the user it's taking longer than usual and offer to keep checking or let them ask manually.
 
 ## Available Voices
 
