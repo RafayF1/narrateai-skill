@@ -34,8 +34,8 @@ For detailed workflow steps and edge cases, consult `references/workflows.md`.
 Video processing takes **3–5 minutes** depending on video length and processing type. You MUST follow these rules:
 
 1. **Poll with `get_job_result(job_id)` every 60 seconds.** Do NOT poll more frequently than this.
-2. **Keep poll messages brief.** Say "Still processing, checking again shortly..." — do NOT offer workarounds or alternatives.
-3. **A job at 10–30% progress is NORMAL.** Do NOT interpret low progress as an error or failure.
+2. **Keep poll messages brief.** Report the `phase` field from the response — do NOT offer workarounds or alternatives.
+3. **Progress phases are NORMAL:** 10–30% = frame analysis (1-3 min), 35–50% = script generation, 60–75% = audio generation (2-4 min, progress stays ~60% until done). Do NOT interpret unchanged progress as a problem.
 4. **NEVER diagnose source/download problems from progress percentage alone.** If `status` is `processing`, the video is being worked on.
 5. **NEVER suggest the user re-upload, switch hosting, or use a different URL** while a job is still `processing`.
 6. Only report failure if `status: failed` with an explicit error message.
