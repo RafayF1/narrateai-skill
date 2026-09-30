@@ -25,20 +25,24 @@ Video processing takes **3–5 minutes** depending on video length and processin
 
 ## Available Voices
 
-When a voice is needed and the user hasn't specified one, ask them to choose:
+When a voice is needed and the user hasn't specified one, ask them to choose. Pass these names as `voice_type`. There is no cloning-model choice.
 
-**AI Voices:**
-- **male1** (default, fastest generation)
-- **female1** (default, fastest generation)
-- **female2**, **female3**, **female4**
-- **male2**, **male3**
+**AI voices:**
+- **male1** (fastest default)
+- **female1** (fastest default)
+- **male2**, **male3**, **male4**, **male5**, **male6**
+- **female2**, **female3**, **female4**, **female5**
 
-**Voice Cloning:**
-Users can provide an audio file (local path or URL) for voice cloning. Ask: "Would you like an AI voice or your own voice sample for cloning?"
+**Voice cloning:** pass `voice_sample` (local path or URL). It overrides `voice_type`. The narration language decides the clone.
+- English, Chinese, Japanese, Korean, German, French, Russian, Portuguese, Spanish, and Italian use the newer clone. English treats the sample as English. For the other nine, the sample language is detected automatically and the narration is spoken in the selected language.
+- Arabic, Hindi, Dutch, Polish, Swedish, Danish, Finnish, Norwegian, Turkish, Greek, Hebrew, Malay, and Swahili use the multilingual clone.
+
+male2–male6 and female2–female5 use the newer clone for those same ten languages. male1 and female1 use the newer clone for the nine languages other than English, and Turbo for every language outside those ten. English male1 stays the regular fast voice and English female1 stays Turbo. Uploaded clones outside those ten languages use the multilingual clone.
 
 ## Supported Languages
 
-en, es, fr, de, it, pt, ru, zh, yue, ja, ko — and others via Whisper fallback.
+Narration and text-to-speech: en, es, fr, de, it, pt, ru, ja, ko, zh, ar, hi, nl, pl, sv, da, fi, no, tr, el, he, ms, sw.
+Ask the user for a transcription source language. Do not guess it.
 
 ---
 
