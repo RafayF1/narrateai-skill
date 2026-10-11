@@ -3,7 +3,7 @@ name: narrateai-video-workflows
 description: NarrateAI video processing workflows via MCP. Narrate silent videos with AI voiceover, transcribe speech-to-text, translate transcripts, dub videos with voice cloning, and generate documents from screencasts. Use when user wants to narrate a video, add voiceover, transcribe a meeting, translate a video, dub into another language, generate a guide from a screencast, create product docs from video, edit the narration script, show my videos, or re-narrate in another language. Requires the narrateai MCP server. Do NOT use for general video editing, trimming, compression, or format conversion.
 metadata:
   author: NarrateAI
-  version: 2.0.0
+  version: 2.1.0
   mcp-server: narrateai
   category: video-processing
   tags:
@@ -52,7 +52,9 @@ Ask the user to choose when a voice is needed — do not default silently:
 - **male2**, **male3**, **male4**, **male5**, **male6**
 - **female2**, **female3**, **female4**, **female5**
 
-**Voice cloning:** pass `voice_sample` (local path or URL). It overrides `voice_type`. There is no model choice. The narration language decides the clone:
+**Saved cloned voice:** call `list_voices`, then pass that voice's `id` as `voice_profile_id` to `generate_tts`, `narrate_video_full`, `continue_to_full_video`, or `narrate_batch`. Leave `voice_type` empty. A new `voice_sample` overrides the saved voice.
+
+**Voice cloning:** pass `voice_sample` (local path or URL). It overrides `voice_type` and `voice_profile_id`. There is no model choice. The narration language decides the clone:
 - English, Chinese, Japanese, Korean, German, French, Russian, Portuguese, Spanish, and Italian use the newer clone. English treats the sample as English. For the other nine, the sample language is detected automatically and the narration is spoken in the selected language.
 - Arabic, Hindi, Dutch, Polish, Swedish, Danish, Finnish, Norwegian, Turkish, Greek, Hebrew, Malay, and Swahili use the multilingual clone.
 
@@ -81,12 +83,13 @@ Ask the user for a transcription source language. Do not guess it.
 | Dub multiple videos | `batch_dub` | Max 5 |
 | Edit narration before producing video | `update_transcript` | Send ALL segments |
 | Browse past videos | `list_videos` | Paginated |
+| Use a saved cloned voice | `list_voices` then pass `voice_profile_id` | Paid accounts; id and name only |
 | Translate and re-narrate existing video | `list_videos` → `translate_existing_video` → `update_transcript` → `continue_to_full_video` | Use `reset_for_reprocessing=True` |
 
 ## Critical Rules
 
 1. **Always ask for context** before narrating: "Can you describe what this video shows?" This dramatically improves narration quality. Never skip this.
-2. **Always ask for voice** before narrating: "Would you like an AI voice (male1, female1, etc.) or your own voice sample for cloning?" Do not silently default.
+2. **Always ask for voice** before narrating: "Would you like an AI voice (male1, female1, etc.), one of your saved cloned voices, or a new voice sample?" Do not silently default. For a saved voice, call `list_voices` and pass `voice_profile_id`.
 3. **Always ask for source language** before transcribing. Do not guess.
 4. **Always ask about background music** before dubbing. Do not assume.
 5. **Always ask for document type** before generating documents.
@@ -99,7 +102,7 @@ Ask the user for a transcription source language. Do not guess it.
 2. Ask for language (default: en).
 3. **MUST ASK:** "Can you describe what this video shows?"
 4. **MUST ASK:** "Would you like an AI voice (male1, female1, etc.) or your own voice sample for cloning?"
-5. Call `narrate_video_full` with `video_source`, `language`, `voice_type` (or `voice_sample` if cloning), `manual_context`.
+5. Call `narrate_video_full` with `video_source`, `language`, and `voice_type`, `voice_profile_id`, or `voice_sample`, plus `manual_context`.
 6. Present `video_url` as a download link.
 
 ### Two-Step: Script Then Video
@@ -107,7 +110,7 @@ Ask the user for a transcription source language. Do not guess it.
 1. Call `generate_narration_script` (ask for context first).
 2. Present transcript segments to user.
 3. Offer to edit: "Would you like to change any segments?" If yes, apply changes and call `update_transcript` with full transcript.
-4. Ask: "AI voice or your own voice sample?" Then call `continue_to_full_video` with `voice_type` or `voice_sample`.
+4. Ask: "AI voice, a saved cloned voice, or a new voice sample?" Then call `continue_to_full_video` with `voice_type`, `voice_profile_id`, or `voice_sample`.
 
 ### Transcribe Speech
 

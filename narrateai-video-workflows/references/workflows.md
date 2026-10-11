@@ -5,39 +5,21 @@ This document describes every workflow available through the NarrateAI MCP serve
 ## Before You Start
 
 - **Stdio mode (local):** Processing tools poll internally (every 25s, up to 15 min). Do NOT manually poll unless the tool returns `status: timeout`.
-- **HTTP/remote mode:** Processing tools return a `job_id` immediately. Poll with `get_job_result(job_id)` every 60 seconds — see Polling Rules below.
+- **HTTP/remote mode:** Processing tools return a `job_id` immediately. Poll with `get_job_result(job_id)` every 60 seconds — do NOT poll more frequently. Keep poll messages brief. Do NOT interpret slow progress as failure.
 - Always preserve and return `job_id` and `db_job_id` from responses — users may need them later.
 - When a tool returns `video_url`, present it as a clickable download link.
 - **Local files in HTTP/remote mode:** The server cannot access local files. Use `get_upload_url` first, upload via curl, then pass the returned `temp_file_path` as `video_source`.
 
-### Polling Rules (HTTP/Remote Mode)
-
-Video processing takes **3–5 minutes** depending on video length and processing type.
-
-1. **Poll with `get_job_result(job_id)` every 60 seconds.** Do NOT poll more frequently than this.
-2. **Keep poll messages brief.** Report the `phase` field from the response — do NOT offer workarounds or alternatives.
-3. **Progress phases are NORMAL:** 10–30% = frame analysis (1-3 min), 35–50% = script generation, 60–75% = audio generation (2-4 min, progress stays ~60% until done). Do NOT interpret unchanged progress as a problem.
-4. **NEVER diagnose source/download problems from progress percentage alone.** If `status` is `processing`, the video is being worked on.
-5. **NEVER suggest the user re-upload, switch hosting, or use a different URL** while a job is still `processing`.
-6. Only report failure if `status: failed` with an explicit error message.
-7. If you get `status: poll_error`, this is a **transient connection issue** — the job is still running. Just retry `get_job_result` on your next poll. Do NOT treat this as a failure or suggest troubleshooting.
-8. **After ~6 polls** (~6 minutes) with no completion, tell the user it's taking longer than usual and offer to keep checking or let them ask manually.
-
 ## Available Voices
 
 When a voice is needed and the user hasn't specified one, ask them to choose. Pass these names as `voice_type`. There is no cloning-model choice.
-
-**AI voices:**
-- **male1** (fastest default)
-- **female1** (fastest default)
+- **male1** (fastest default), **female1** (fastest default)
 - **male2**, **male3**, **male4**, **male5**, **male6**
 - **female2**, **female3**, **female4**, **female5**
 
-**Voice cloning:** pass `voice_sample` (local path or URL). It overrides `voice_type`. The narration language decides the clone.
-- English, Chinese, Japanese, Korean, German, French, Russian, Portuguese, Spanish, and Italian use the newer clone. English treats the sample as English. For the other nine, the sample language is detected automatically and the narration is spoken in the selected language.
-- Arabic, Hindi, Dutch, Polish, Swedish, Danish, Finnish, Norwegian, Turkish, Greek, Hebrew, Malay, and Swahili use the multilingual clone.
+Saved cloned voice: call `list_voices`, then pass that voice's `id` as `voice_profile_id` to `generate_tts`, `narrate_video_full`, `continue_to_full_video`, or `narrate_batch`. Leave `voice_type` empty. A new `voice_sample` overrides the saved voice.
 
-male2–male6 and female2–female5 use the newer clone for those same ten languages. male1 and female1 use the newer clone for the nine languages other than English, and Turbo for every language outside those ten. English male1 stays the regular fast voice and English female1 stays Turbo. Uploaded clones outside those ten languages use the multilingual clone.
+Voice cloning: pass `voice_sample`. It overrides `voice_type` and `voice_profile_id`. English, Chinese, Japanese, Korean, German, French, Russian, Portuguese, Spanish, and Italian use the newer clone. English treats the sample as English. For the other nine, the sample language is detected and the narration is spoken in the selected language. Arabic, Hindi, Dutch, Polish, Swedish, Danish, Finnish, Norwegian, Turkish, Greek, Hebrew, Malay, and Swahili use the multilingual clone. male2–male6 and female2–female5 use the newer clone for those same ten languages. male1 and female1 use the newer clone for the nine languages other than English, and Turbo for every language outside those ten. English male1 stays the regular fast voice and English female1 stays Turbo. Uploaded clones outside those ten languages use the multilingual clone.
 
 ## Supported Languages
 
@@ -120,14 +102,14 @@ Ask the user for a transcription source language. Do not guess it.
 
 **Trigger:** User uploads a video with speech and wants a translated transcript.
 
-**Tool:** `transcribe_and_translate`
+**Tool:** `translate_video`
 
 ### Steps
 
 1. Get the video source.
 2. Ask for source language (spoken in the video). Required.
 3. Ask for target language. Required.
-4. Call `transcribe_and_translate` with `video_source`, `source_language`, `target_language`.
+4. Call `translate_video` with `video_source`, `source_language`, `target_language`.
 5. Present the translated transcript segments.
 
 ---
@@ -312,18 +294,6 @@ The response includes `has_synced_transcript: true` and a `transcript` array. Of
 
 ---
 
-## Video Source Options
-
-All processing tools accept a `video_source`. Supported formats:
-
-| Source | Format | Notes |
-|--------|--------|-------|
-| Direct URL | `https://example.com/video.mp4` | Any publicly accessible URL |
-| Google Drive | `https://drive.google.com/uc?export=download&id=FILE_ID` | Convert share link: extract `FILE_ID` from `drive.google.com/file/d/FILE_ID/view` |
-| Dropbox | `https://dropbox.com/...?dl=1` | Change `?dl=0` to `?dl=1` for direct download |
-| Local file | `/path/to/video.mp4` | Stdio mode only |
-| Temp upload | `temp/user-id/filename.mp4` | Use upload flow below for remote mode |
-
 ## Uploading Local Files (Remote Mode)
 
 When the MCP server runs remotely and the user provides a local file:
@@ -333,19 +303,6 @@ When the MCP server runs remotely and the user provides a local file:
 3. Pass `temp_file_path` as `video_source` to any processing tool.
 
 Not needed in stdio mode — tools read local files directly.
-
-### Claude.ai / Web Sandbox Limitation
-
-Web-based AI environments (like Claude.ai) block outgoing requests to `storage.googleapis.com`, so the curl upload cannot be run from within the sandbox.
-
-**Workaround A — User runs curl locally:**
-1. Call `get_upload_url(filename)` — the MCP call works fine.
-2. Give the user the exact curl command to paste in their terminal.
-3. Tell them: "Run this in your terminal. No output means success."
-4. Once confirmed, proceed with `temp_file_path` as `video_source`.
-
-**Workaround B — Public URL (easier):**
-Ask the user to share the video via Google Drive, Dropbox, or any file host and provide the public URL. Pass that URL directly as `video_source` — no upload step needed.
 
 ---
 
