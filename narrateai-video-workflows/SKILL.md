@@ -1,9 +1,9 @@
 ---
 name: narrateai-video-workflows
-description: NarrateAI video processing workflows via MCP. Narrate silent videos with AI voiceover, transcribe speech-to-text, translate transcripts, dub videos with voice cloning, and generate documents from screencasts. Use when user wants to narrate a video, add voiceover, transcribe a meeting, translate a video, dub into another language, generate a guide from a screencast, create product docs from video, edit the narration script, show my videos, or re-narrate in another language. Requires the narrateai MCP server. Do NOT use for general video editing, trimming, compression, or format conversion.
+description: NarrateAI video processing workflows via MCP. Narrate silent videos with AI voiceover, transcribe speech-to-text, translate transcripts, dub videos with voice cloning, generate documents from screencasts, or speak with a connected ElevenLabs voice. Use when user wants to narrate a video, add voiceover, transcribe a meeting, translate a video, dub into another language, generate a guide from a screencast, create product docs from video, edit the narration script, show my videos, re-narrate in another language, or use their ElevenLabs voice. Requires the narrateai MCP server. Do NOT use for general video editing, trimming, compression, or format conversion.
 metadata:
   author: NarrateAI
-  version: 2.1.0
+  version: 2.2.0
   mcp-server: narrateai
   category: video-processing
   tags:
@@ -54,6 +54,8 @@ Ask the user to choose when a voice is needed — do not default silently:
 
 **Saved cloned voice:** call `list_voices`, then pass that voice's `id` as `voice_profile_id` to `generate_tts`, `narrate_video_full`, `continue_to_full_video`, or `narrate_batch`. Leave `voice_type` empty. A new `voice_sample` overrides the saved voice.
 
+**ElevenLabs:** the user connects their account in NarrateAI. Call `list_elevenlabs_voices`, then pass `voice_id` as `elevenlabs_voice_id` to those same tools. Leave `voice_type` and `voice_profile_id` empty. ElevenLabs bills the speech. If `library` is true and `library_voices_allowed` is false, ask for another voice from the list. If `connected` is false, tell the user to connect ElevenLabs in NarrateAI. A free NarrateAI plan cannot connect it. One-Time, AppSumo, Growth, and Pro can.
+
 **Voice cloning:** pass `voice_sample` (local path or URL). It overrides `voice_type` and `voice_profile_id`. There is no model choice. The narration language decides the clone:
 - English, Chinese, Japanese, Korean, German, French, Russian, Portuguese, Spanish, and Italian use the newer clone. English treats the sample as English. For the other nine, the sample language is detected automatically and the narration is spoken in the selected language.
 - Arabic, Hindi, Dutch, Polish, Swedish, Danish, Finnish, Norwegian, Turkish, Greek, Hebrew, Malay, and Swahili use the multilingual clone.
@@ -84,12 +86,13 @@ Ask the user for a transcription source language. Do not guess it.
 | Edit narration before producing video | `update_transcript` | Send ALL segments |
 | Browse past videos | `list_videos` | Paginated |
 | Use a saved cloned voice | `list_voices` then pass `voice_profile_id` | Paid accounts; id and name only |
+| Use an ElevenLabs voice | `list_elevenlabs_voices` then pass `elevenlabs_voice_id` | Account connected in NarrateAI |
 | Translate and re-narrate existing video | `list_videos` → `translate_existing_video` → `update_transcript` → `continue_to_full_video` | Use `reset_for_reprocessing=True` |
 
 ## Critical Rules
 
 1. **Always ask for context** before narrating: "Can you describe what this video shows?" This dramatically improves narration quality. Never skip this.
-2. **Always ask for voice** before narrating: "Would you like an AI voice (male1, female1, etc.), one of your saved cloned voices, or a new voice sample?" Do not silently default. For a saved voice, call `list_voices` and pass `voice_profile_id`.
+2. **Always ask for voice** before narrating: "Would you like an AI voice (male1, female1, etc.), one of your saved cloned voices, an ElevenLabs voice, or a new voice sample?" Do not silently default. For a saved voice, call `list_voices` and pass `voice_profile_id`. For ElevenLabs, call `list_elevenlabs_voices` and pass `elevenlabs_voice_id`.
 3. **Always ask for source language** before transcribing. Do not guess.
 4. **Always ask about background music** before dubbing. Do not assume.
 5. **Always ask for document type** before generating documents.

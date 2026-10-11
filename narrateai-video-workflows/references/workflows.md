@@ -19,6 +19,8 @@ When a voice is needed and the user hasn't specified one, ask them to choose. Pa
 
 Saved cloned voice: call `list_voices`, then pass that voice's `id` as `voice_profile_id` to `generate_tts`, `narrate_video_full`, `continue_to_full_video`, or `narrate_batch`. Leave `voice_type` empty. A new `voice_sample` overrides the saved voice.
 
+ElevenLabs: the user connects their account in NarrateAI. Call `list_elevenlabs_voices`, then pass `voice_id` as `elevenlabs_voice_id` to those same tools. Leave `voice_type` and `voice_profile_id` empty. ElevenLabs bills the speech. If `library` is true and `library_voices_allowed` is false, ask for another voice from the list. If `connected` is false, tell the user to connect ElevenLabs in NarrateAI. A free NarrateAI plan cannot connect it. One-Time, AppSumo, Growth, and Pro can.
+
 Voice cloning: pass `voice_sample`. It overrides `voice_type` and `voice_profile_id`. English, Chinese, Japanese, Korean, German, French, Russian, Portuguese, Spanish, and Italian use the newer clone. English treats the sample as English. For the other nine, the sample language is detected and the narration is spoken in the selected language. Arabic, Hindi, Dutch, Polish, Swedish, Danish, Finnish, Norwegian, Turkish, Greek, Hebrew, Malay, and Swahili use the multilingual clone. male2–male6 and female2–female5 use the newer clone for those same ten languages. male1 and female1 use the newer clone for the nine languages other than English, and Turbo for every language outside those ten. English male1 stays the regular fast voice and English female1 stays Turbo. Uploaded clones outside those ten languages use the multilingual clone.
 
 ## Supported Languages
